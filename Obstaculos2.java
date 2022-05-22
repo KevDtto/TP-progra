@@ -11,7 +11,7 @@ public class Obstaculos2 {
 	private double y;
 	private double radio;
 	private Image image = Herramientas.cargarImagen("obs.png");
-	
+
 	public Obstaculos2(double x, double y, double radio) {
 		this.x = x;
 		this.y = y;
@@ -20,8 +20,9 @@ public class Obstaculos2 {
 
 	public void dibujar(Entorno e) {
 //		e.dibujarCirculo(this.x, this.y, this.radio, Color.BLUE);
-		e.dibujarImagen(image, x+35, y+15, 0, 1.8/*1.2*/);
+		e.dibujarImagen(image, x + 35, y + 15, 0, 1.8/* 1.2 */);
 	}
+
 	public void dibujar2(Entorno e) {
 		e.dibujarCirculo(this.x, this.y, this.radio, Color.BLUE);
 //		e.dibujarImagen(image, x+50, y, 0);
@@ -52,5 +53,11 @@ public class Obstaculos2 {
 		this.radio = radio;
 	}
 
+	public Image getImage() {
+		return image;
+	}
 
+	public void setImage(Image image) {
+		this.image = image;
+	}
 }
