@@ -1,41 +1,44 @@
 package juego;
 
+
 import java.awt.Color;
 import java.awt.Image;
-
+import java.util.Iterator;
+import java.util.Random;
 import entorno.Entorno;
 import entorno.Herramientas;
 import entorno.InterfaceJuego;
+import utils.Tiempo;
+import utils.Lista;
+import utils.Nodo;
 
 public class Juego extends InterfaceJuego {
 
 	// El objeto Entorno que controla el tiempo y otros
 	private Entorno entorno;
 	private Mikasa mikasa;
-	private Image image;
 	private Suero suero;
-	private Image image2;
 	private Tiempo tiempo;
 	private Image imageFondo;
 	private Titan titan;
-//	private Disparo disparo;
+	private Disparo[] disparos;
 	private Obstaculos obstaculos;
+	private boolean item;
 
 	public Juego() {
 		// Inicializa el objeto entorno
 		this.entorno = new Entorno(this, "Sakura Ikebana Delivery - Grupo N - Apellido1 - Apellido2 -Apellido3 - V0.01",
 				800, 600);
 		this.mikasa = new Mikasa(400, 300, 40, 0, false);
-		this.image = Herramientas.cargarImagen("mikasaTitan.png");
 		this.suero = new Suero(0);
-//		this.image2 = Herramientas.cargarImagen("Suero.png");
-		this.tiempo = new Tiempo(true, 0);
-		this.titan = new Titan(6);
+		this.tiempo = new Tiempo(true, 0, 60);
+		this.titan = new Titan(1);
 		this.titan.generarTitan();
-//		this.disparo = new Disparo(0, 0, 10, 5, 0);
+		this.disparos = new Disparo[300];
 		this.imageFondo = Herramientas.cargarImagen("FondoSeis.jpg");
-		this.obstaculos = new Obstaculos(4);
+		this.obstaculos = new Obstaculos(5);
 		this.obstaculos.generarObs();
+		this.item = false;
 
 		// Inicializar lo que haga falta para el juego
 		// ...
@@ -55,9 +58,10 @@ public class Juego extends InterfaceJuego {
 		// ...
 
 		if (tiempo.isInicia()) {
+
 //			dibujar
 			entorno.dibujarImagen(this.imageFondo, 400, 400, 0, 1.7);
-			mikasa.dibujar2(entorno);
+			mikasa.dibujarSprite(entorno);
 			for (Titan2 ttn : this.titan.getTitan2()) {
 				ttn.moverTitan();
 				ttn.direccionTitan(mikasa.getX(), mikasa.getY());
@@ -76,96 +80,69 @@ public class Juego extends InterfaceJuego {
 			if (entorno.estaPresionada('d'))
 				mikasa.moverDerecha();
 
-//			if (entorno.estaPresionada(entorno.TECLA_ESPACIO)) {
-//				disparo.dibujar(entorno);
-//				disparo.wmoverBala();
-//			}
+//			disparo
+			for (Disparo d : disparos) {
+				if (d != null) {
+					d.setX(mikasa.getX());
+					d.setY(mikasa.getY());
+					d.setAngulo(mikasa.getAngulo());
+				}
+			}
+			if (this.entorno.estaPresionada(this.entorno.TECLA_ESPACIO)
+					&& this.mikasa.getUltimoDisparo() + 90 <= this.tiempo.getContar() && !mikasa.convertir) {
+				this.mikasa.disparar((int) this.tiempo.getContar());
+			}
+			procesarDisparos();
+
+//			suero
+			crearSuero();
+			funcionSuero();
 			
-			if ((double)tiempo.getContar() == 10.995000000000038/*0.015*/ || (int) tiempo.getContar() == 19) {
-				suero.setX(Math.random() * 750);
-				suero.setY(Math.random() * 550);
-				suero.setRadio(40);		
-//				if(suero.getImage() == null) {
-//					suero.setImage(suero.getAux());
-//				}
-
-			}
-
-			
-			if (((int) tiempo.getContar() > 10 && (int) tiempo.getContar() < 18)
-					|| ((int) tiempo.getContar() > 20 && (int) tiempo.getContar() < 28)) {
-//				suero.setImage(image2);
-				suero.dibujar(entorno);
-				suero.dibujar2(entorno);	
-//				if(suero.colisiona(suero.getX(), mikasa.getY(), mikasa.getDistancia())) {
-//					suero.setImage(null);
-//				}
-
-			}
-			suero.distancia(suero.getX(), suero.getY(), mikasa.getX(), mikasa.getY());
-			if (suero.getDistancia() <= 80 && suero.colisiona(mikasa.getRadio(), suero.getRadio(), suero.getDistancia())) {
-				mikasa.setConvertir(true);
-				mikasa.setRadio(100);
-//				mikasa.dibujar(entorno);
-//				mikasa.dibujar2(entorno);
-				suero.setRadio(0);
-				suero.setImage(null);
-			}
-
-
-
-//			para choque con los titanes
-//			for (Titan2 ttn : this.titan.getTitan2()) {
-//				mikasa.distancia(mikasa.getX(), mikasa.getY(), ttn.getX(), ttn.getY());
-//			}
-
+//			obstaculos
 //			por cada obstaculo chequea la distancia entre el titan y el obs, si el metodo colisiona es true,
 //			y la distancia entre los circulos es menor a 100, resta o suma en sus respectivos X e Y. del titan
 			for (Obstaculos2 obs : this.obstaculos.getObstaculos2()) {
 				for (Titan2 ttn : this.titan.getTitan2()) {
 					obstaculos.distancia(obs.getX(), obs.getY(), ttn.getX(), ttn.getY());
 					if (obstaculos.colisiona(obs.getRadio(), ttn.getRadio(), obstaculos.getDistancia())
-							&& obstaculos.getDistancia() <= 120) {
+							&& obstaculos.getDistancia() <= 70) {
 						titanChocaObs(ttn, obs);
 					}
-					obs.dibujar(entorno);
+					obs.dibujarSprite(entorno);
 					ttn.dibujar2(entorno);
-//				obs.dibujar2(entorno);
-				}
-			}
-//			titan.dibujar2(entorno);
-//			lo mismo pero con mikasa
-			for (Obstaculos2 obs : this.obstaculos.getObstaculos2()) {
-				obstaculos.distancia(obs.getX(), obs.getY(), mikasa.getX(), mikasa.getY());
-				if (obstaculos.colisiona(obs.getRadio(), mikasa.getRadio(), obstaculos.getDistancia())
-						&& obstaculos.getDistancia() <= 100) {
-					if (mikasa.getX() <= obs.getX() && mikasa.getY() <= obs.getY()) {
-						mikasa.setX(mikasa.getX() - 2);
-						mikasa.setY(mikasa.getY() - 2);
-					} else if (mikasa.getX() >= obs.getX() && mikasa.getY() >= obs.getY()) {
-						mikasa.setX(mikasa.getX() + 2);
-						mikasa.setY(mikasa.getY() + 2);
-					} else if (mikasa.getX() >= obs.getX() && mikasa.getY() <= obs.getY()) {
-						mikasa.setX(mikasa.getX() + 2);
-						mikasa.setY(mikasa.getY() - 2);
-					} else if (mikasa.getX() <= obs.getX() && mikasa.getY() >= obs.getY()) {
-						mikasa.setX(mikasa.getX() - 2);
-						mikasa.setY(mikasa.getY() + 2);
-					}
+//					obs.dibujar2(entorno);
 				}
 			}
 
+//			lo mismo pero con mikasa
+			for (Obstaculos2 obs : this.obstaculos.getObstaculos2()) {
+				obstaculos.distancia(obs.getX(), obs.getY(), mikasa.getX(), mikasa.getY());
+				if (!mikasa.convertir
+						&& obstaculos.colisiona(obs.getRadio(), mikasa.getRadio(), obstaculos.getDistancia())
+						&& obstaculos.getDistancia() <= 70) {
+					mikasaChocaObs(obs);
+				} else if (mikasa.convertir
+						&& obstaculos.colisiona(obs.getRadio(), mikasa.getRadio(), obstaculos.getDistancia())
+						&& obstaculos.getDistancia() <= 85) {
+					mikasaChocaObs(obs);
+				}
+			}
 
 //			controla el fin del juego
 //			if ((int) tiempo.getContar() > 40) {
 //				this.tiempo = new Tiempo(false, 0);
 //			}
 
-			tiempo.setContar(0.015);
+//			tiempo.setContar(0.015);
+			tiempo.setContar(1);
+			tiempo.setTimer(0.0111101);
 
-//			imprime el tiempo
-			System.out.println(tiempo.getContar());
-			// genera obstaculos
+//			diujar datos
+			entorno.cambiarFont("Arial Black", 25, Color.BLACK);
+			entorno.escribirTexto("KYOJINES ELIMINADOS: " + 0, 4, 588);
+			entorno.cambiarFont("Arial Black", 25, Color.WHITE);
+			entorno.escribirTexto("TIEMPO: " + (int) tiempo.getTimer(), 620, 23);
+			entorno.escribirTexto("PUNTAJE: " + 0, 4, 23);
 
 		} else {
 			entorno.cambiarFont("Arial", 32, Color.WHITE);
@@ -178,25 +155,125 @@ public class Juego extends InterfaceJuego {
 		if (ttn.getX() <= obs.getX() && ttn.getY() <= obs.getY()) {
 			ttn.setX(ttn.getX() - 2);
 			ttn.setY(ttn.getY() - 2);
-			ttn.direccionTitan(obs.getX(), obs.getY());
 		} else if (ttn.getX() >= obs.getX() && ttn.getY() >= obs.getY()) {
 			ttn.setX(ttn.getX() + 2);
 			ttn.setY(ttn.getY() + 2);
-			ttn.direccionTitan(obs.getX(), obs.getY());
 		} else if (ttn.getX() >= obs.getX() && ttn.getY() <= obs.getY()) {
 			ttn.setX(ttn.getX() + 2);
 			ttn.setY(ttn.getY() - 2);
-			ttn.direccionTitan(obs.getX(), obs.getY());
 		} else if (ttn.getX() <= obs.getX() && ttn.getY() >= obs.getY()) {
 			ttn.setX(ttn.getX() - 2);
 			ttn.setY(ttn.getY() + 2);
-			ttn.direccionTitan(obs.getX(), obs.getY());
 		}
 	}
 
-//	public void mikasaChocaObs(Mikasa mk) {
-//
-//	}
+	public void mikasaChocaObs(Obstaculos2 obs) {
+		if (mikasa.getX() <= obs.getX() && mikasa.getY() <= obs.getY()) {
+			mikasa.setX(mikasa.getX() - 2);
+			mikasa.setY(mikasa.getY() - 2);
+			mikasa.setConvertir(false);
+		} else if (mikasa.getX() >= obs.getX() && mikasa.getY() >= obs.getY()) {
+			mikasa.setX(mikasa.getX() + 2);
+			mikasa.setY(mikasa.getY() + 2);
+		} else if (mikasa.getX() >= obs.getX() && mikasa.getY() <= obs.getY()) {
+			mikasa.setX(mikasa.getX() + 2);
+			mikasa.setY(mikasa.getY() - 2);
+		} else if (mikasa.getX() <= obs.getX() && mikasa.getY() >= obs.getY()) {
+			mikasa.setX(mikasa.getX() - 2);
+			mikasa.setY(mikasa.getY() + 2);
+		}
+	}
+
+	public void crearSuero() {
+		for (Obstaculos2 obs : this.obstaculos.getObstaculos2()) {
+			if (tiempo.getContar() == 600/* 0.015 */) {
+				suero.setX(Math.random() * (50 - 750) + 750);
+				suero.setY(Math.random() * (50 - 550) + 550);
+				suero.setRadio(40);
+//				suero.distancia2(suero.getX(), suero.getY(), obs.getX(), obs.getY());
+//				if (suero.colisiona(obs.getRadio(), suero.getRadio(), suero.getDistancia2())) {
+				if (suero.getX() <= obs.getX() && suero.getY() <= obs.getY()) {
+					suero.setX(suero.getX() + 40);
+					suero.setY(suero.getY() + 40);
+				} else if (suero.getX() >= obs.getX() && suero.getY() >= obs.getY()) {
+					suero.setX(suero.getX() + 40);
+					suero.setY(suero.getY() + 40);
+				} else if (suero.getX() >= obs.getX() && suero.getY() <= obs.getY()) {
+					suero.setX(suero.getX() + 40);
+					suero.setY(suero.getY() - 40);
+				} else if (suero.getX() <= obs.getX() && suero.getY() >= obs.getY()) {
+					suero.setX(suero.getX() - 40);
+					suero.setY(suero.getY() + 40);
+				}
+			}
+			if (tiempo.getContar() == 2000) {
+				this.item = false;
+				suero.setX(Math.random() * (50 - 750) + 750);
+				suero.setY(Math.random() * (50 - 550) + 550);
+				suero.setRadio(40);
+				if (suero.getX() <= obs.getX() && suero.getY() <= obs.getY()) {
+					suero.setX(suero.getX() + 40);
+					suero.setY(suero.getY() + 40);
+				} else if (suero.getX() >= obs.getX() && suero.getY() >= obs.getY()) {
+					suero.setX(suero.getX() + 40);
+					suero.setY(suero.getY() + 40);
+				} else if (suero.getX() >= obs.getX() && suero.getY() <= obs.getY()) {
+					suero.setX(suero.getX() + 40);
+					suero.setY(suero.getY() - 40);
+				} else if (suero.getX() <= obs.getX() && suero.getY() >= obs.getY()) {
+					suero.setX(suero.getX() - 40);
+					suero.setY(suero.getY() + 40);
+				}
+			}
+		}
+
+	}
+
+	public void funcionSuero() {
+		if ((tiempo.getContar() > 600 && tiempo.getContar() < 1500) && !item) {
+			suero.distancia(suero.getX(), suero.getY(), mikasa.getX(), mikasa.getY());
+			if (suero.getDistancia() <= 60
+					&& suero.colisiona(mikasa.getRadio(), suero.getRadio(), suero.getDistancia())) {
+				this.item = true;
+				mikasa.setConvertir(true);
+				mikasa.setRadio(105);
+				mikasa.dibujarSprite(entorno);
+				suero.setImage(null);
+
+			} else {
+				suero.dibujarSprite(entorno);
+			}
+		} else if ((tiempo.getContar() > 2000 && tiempo.getContar() < 4500) && !item) {
+			suero.distancia(suero.getX(), suero.getY(), mikasa.getX(), mikasa.getY());
+			if (suero.getDistancia() <= 60
+					&& suero.colisiona(mikasa.getRadio(), suero.getRadio(), suero.getDistancia())) {
+				this.item = true;
+				suero.setAux(null);
+				mikasa.setConvertir(true);
+				mikasa.setRadio(105);
+				mikasa.dibujarSprite(entorno);
+
+			} else {
+				suero.dibujarSprite(entorno);
+			}
+		}
+	}
+
+	private void moverDisparo(Nodo<Disparo> nodoDisparo) {
+		nodoDisparo.getElemento().mover();
+		nodoDisparo.getElemento().dibujarSprite(this.entorno);
+//		nodoDisparo.getElemento().dibujar(entorno);
+		if (!nodoDisparo.getElemento().estaEnPantalla()) {
+			this.mikasa.getDisparos().quitarPorId(nodoDisparo.getId());
+		}
+	}
+
+	private void procesarDisparos() {
+		this.mikasa.getDisparos().forEachNodo(disparo -> {
+			this.moverDisparo(disparo);
+			return null;
+		});
+	}
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
@@ -204,4 +281,3 @@ public class Juego extends InterfaceJuego {
 	}
 
 }
-
