@@ -18,14 +18,12 @@ public class Obstaculos2 {
 		this.radio = radio;
 	}
 
-	public void dibujar(Entorno e) {
-//		e.dibujarCirculo(this.x, this.y, this.radio, Color.BLUE);
-		e.dibujarImagen(image, x + 35, y + 15, 0, 1.8/* 1.2 */);
+	public void dibujarSprite(Entorno e) {
+		e.dibujarImagen(image, x + 30, y + 5, 0, 1.2/* 1.2 */);
 	}
 
 	public void dibujar2(Entorno e) {
 		e.dibujarCirculo(this.x, this.y, this.radio, Color.BLUE);
-//		e.dibujarImagen(image, x+50, y, 0);
 	}
 
 	// getters and setters
