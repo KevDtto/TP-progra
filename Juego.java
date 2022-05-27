@@ -171,7 +171,7 @@ public class Juego extends InterfaceJuego {
 		if (mikasa.getX() <= obs.getX() && mikasa.getY() <= obs.getY()) {
 			mikasa.setX(mikasa.getX() - 2);
 			mikasa.setY(mikasa.getY() - 2);
-			mikasa.setConvertir(false);
+			//mikasa.setConvertir(false); esto iria cuando choque con un titan (aca no, obvio)
 		} else if (mikasa.getX() >= obs.getX() && mikasa.getY() >= obs.getY()) {
 			mikasa.setX(mikasa.getX() + 2);
 			mikasa.setY(mikasa.getY() + 2);
