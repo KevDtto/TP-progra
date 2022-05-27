@@ -10,20 +10,20 @@ public class Obstaculos {
 
 	public void generarObs() {
 		if (this.obstaculos2[0] == null) {
-			this.obstaculos2[0] = new Obstaculos2(220, 200, 120);
+			this.obstaculos2[0] = new Obstaculos2(50, 500, 70);
 		}
 		if (this.obstaculos2[1] == null) {
-			this.obstaculos2[1] = new Obstaculos2(220, 450, 120);
+			this.obstaculos2[1] = new Obstaculos2(100, 95, 70);
 		}
 		if (this.obstaculos2[2] == null) {
-			this.obstaculos2[2] = new Obstaculos2(560, 200, 120);
+			this.obstaculos2[2] = new Obstaculos2(360, 507, 70);
 		}
 		if (this.obstaculos2[3] == null) {
-			this.obstaculos2[3] = new Obstaculos2(560, 450, 120);
+			this.obstaculos2[3] = new Obstaculos2(700, 350, 70);
 		}
-//		if(this.obstaculos2[4] == null){
-//			this.obstaculos2[4] = new Obstaculos2(700, 500, 140);
-//		}
+		if(this.obstaculos2[4] == null){
+			this.obstaculos2[4] = new Obstaculos2(440, 200, 70);
+		}
 
 	}
 
